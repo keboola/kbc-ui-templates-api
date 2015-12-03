@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+- '0.11'
+install:
+  - gem install dpl
+script:
+  - node test.js
+after_success:
+  - dpl --provider="lambda" --access_key_id="${AWS_ACCESS_KEY}" --secret_access_key="${AWS_SECRET_KEY}" --function_name="kbc-ui-templates-api" --role="${AWS_LAMBDA_ROLE}" --handler-name="handler"
