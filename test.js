@@ -4,7 +4,12 @@ run = require('./index.js');
 // function. Calling done() exits the process Lambda creates.
 var context = {
     succeed: function(message) {
+        console.log(message);
         process.exit(0);
+    },
+    fail: function(error) {
+        console.log(error);
+        process.exit(1);
     }
 };
 

@@ -1,34 +1,40 @@
-var request = require('request');
-var promises = require('promises');
+var zlib = require('zlib');
+var AWS = require('aws-sdk');
+const bucket = 'kbc-uis';
 
 exports.handler = function(event, context) {
     var component = (event.component === undefined ? 'default' : event.component);
-    var requestPromise = promises.wrap(request);
-    requestPromise(
-        {
-            method: 'GET',
-            uri: 'https://kbc-uis.s3.amazonaws.com/kbc.templates/assets.json',
-            gzip: true
-        }
-    ).then(function(data)
-        {
-            var response = JSON.parse(data.body);
+    var s3 = new AWS.S3();
+    var params = {
+        Bucket: bucket,
+        Key: 'kbc.templates/assets.json'
+    };
+
+    s3.getObject(
+        params,
+        function(err, data) {
+            if (err) {
+                context.fail(err);
+            }
+            var response = JSON.parse(zlib.gunzipSync(data.Body).toString());
             var url = response.default;
             if (response[component]) {
                 url = response[component]
             }
-            return requestPromise(
+            s3.getObject(
                 {
-                    method: 'GET',
-                    uri: url,
-                    gzip: true
+                    Bucket: bucket,
+                    Key: url.substr(url.indexOf(bucket) + bucket.length + 1)
+                },
+                function(err, data) {
+                    if (err) {
+                        context.fail(err);
+                    }
+                    var response = JSON.parse(zlib.gunzipSync(data.Body).toString());
+                    context.succeed(response);
+
                 }
             );
-        }
-    ).then(function(data)
-        {
-            var response = JSON.parse(data.body);
-            context.succeed(response);
         }
     );
 };

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "promises": "^0.2.5",
-    "request": "^2.67.0"
+    "aws-sdk": "^2.2.26",
+    "unzip": "^0.1.11"
   }
 }
